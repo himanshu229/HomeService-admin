@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { Technician, TechnicianStatus, SliceState } from "../../types";
-import { technicianApi } from "../../services/technicianApi";
+import { adminTechnicianApi } from "../../api/technician.api";
 
 type TechnicianState = SliceState<Technician>;
 
@@ -21,7 +21,7 @@ export const fetchTechnicians = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      return await technicianApi.getAll(params);
+      return await adminTechnicianApi.getAll(params);
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message ?? "Failed to fetch technicians");
     }
@@ -32,7 +32,7 @@ export const createTechnician = createAsyncThunk(
   "technicians/create",
   async (data: Partial<Technician>, { rejectWithValue }) => {
     try {
-      return await technicianApi.create(data);
+      return await adminTechnicianApi.create(data as any);
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message ?? "Failed to create technician");
     }
@@ -43,7 +43,7 @@ export const updateTechnician = createAsyncThunk(
   "technicians/update",
   async ({ id, data }: { id: string; data: Partial<Technician> }, { rejectWithValue }) => {
     try {
-      return await technicianApi.update(id, data);
+      return await adminTechnicianApi.update(id, data as any);
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message ?? "Failed to update technician");
     }
@@ -54,7 +54,7 @@ export const deleteTechnician = createAsyncThunk(
   "technicians/delete",
   async (id: string, { rejectWithValue }) => {
     try {
-      await technicianApi.delete(id);
+      await adminTechnicianApi.delete(id);
       return id;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message ?? "Failed to delete technician");

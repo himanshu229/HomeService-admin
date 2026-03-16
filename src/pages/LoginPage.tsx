@@ -12,7 +12,8 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     const result = await dispatch(loginAdmin({ email, password }));
     if (loginAdmin.fulfilled.match(result)) {
       navigate("/");

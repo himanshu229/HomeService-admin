@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { Service, SliceState } from "../../types";
-import { serviceApi } from "../../services/serviceApi";
+import { adminServiceApi } from "../../api/service.api";
 
 type ServiceState = SliceState<Service>;
 
@@ -18,7 +18,7 @@ export const fetchServices = createAsyncThunk(
   "services/fetchAll",
   async (params: { page?: number; limit?: number; search?: string } = {}, { rejectWithValue }) => {
     try {
-      return await serviceApi.getAll(params);
+      return await adminServiceApi.getAll(params);
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message ?? "Failed to fetch services");
     }
@@ -29,7 +29,7 @@ export const createService = createAsyncThunk(
   "services/create",
   async (data: Partial<Service>, { rejectWithValue }) => {
     try {
-      return await serviceApi.create(data);
+      return await adminServiceApi.create(data as any);
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message ?? "Failed to create service");
     }
@@ -40,7 +40,7 @@ export const updateService = createAsyncThunk(
   "services/update",
   async ({ id, data }: { id: string; data: Partial<Service> }, { rejectWithValue }) => {
     try {
-      return await serviceApi.update(id, data);
+      return await adminServiceApi.update(id, data as any);
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message ?? "Failed to update service");
     }
@@ -51,7 +51,7 @@ export const deleteService = createAsyncThunk(
   "services/delete",
   async (id: string, { rejectWithValue }) => {
     try {
-      await serviceApi.delete(id);
+      await adminServiceApi.delete(id);
       return id;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message ?? "Failed to delete service");
@@ -63,7 +63,7 @@ export const toggleServiceStatus = createAsyncThunk(
   "services/toggleStatus",
   async (id: string, { rejectWithValue }) => {
     try {
-      return await serviceApi.toggleStatus(id);
+      return await adminServiceApi.toggleStatus(id);
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message ?? "Failed to toggle status");
     }

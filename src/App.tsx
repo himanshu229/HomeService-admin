@@ -9,11 +9,9 @@ import ProtectedRoute from "./components/common/ProtectedRoute";
 const LoginPage       = lazy(() => import("./pages/LoginPage"));
 const Dashboard       = lazy(() => import("./pages/Dashboard"));
 const ServicesPage    = lazy(() => import("./pages/ServicesPage"));
-const CategoriesPage  = lazy(() => import("./pages/CategoriesPage"));
 const BookingsPage    = lazy(() => import("./pages/BookingsPage"));
 const TechniciansPage = lazy(() => import("./pages/TechniciansPage"));
 const UsersPage       = lazy(() => import("./pages/UsersPage"));
-const OffersPage      = lazy(() => import("./pages/OffersPage"));
 
 const PageLoader: React.FC = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -38,11 +36,9 @@ function App() {
               <Route element={<AdminLayout />}>
                 <Route path="/"            element={<Dashboard />} />
                 <Route path="/services"    element={<ServicesPage />} />
-                <Route path="/categories"  element={<CategoriesPage />} />
                 <Route path="/bookings"    element={<BookingsPage />} />
                 <Route path="/technicians" element={<TechniciansPage />} />
                 <Route path="/users"       element={<UsersPage />} />
-                <Route path="/offers"      element={<OffersPage />} />
               </Route>
             </Route>
 

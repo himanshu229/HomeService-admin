@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { AuthState, AdminUser } from "../../types";
-import { authApi } from "../../services/authApi";
+import { adminAuthApi } from "../../api/auth.api";
 
 const stored = localStorage.getItem("sf_token");
 
@@ -19,7 +19,8 @@ export const loginAdmin = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const res = await authApi.login(credentials);
+      const res = await adminAuthApi.login(credentials);
+      localStorage.setItem("sf_token", res.token);
       return res;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message ?? "Login failed");
@@ -31,8 +32,8 @@ export const fetchMe = createAsyncThunk(
   "auth/fetchMe",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await authApi.getMe();
-      return res;
+      const res = await adminAuthApi.getMe();
+      return res.data.data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message ?? "Session expired");
     }

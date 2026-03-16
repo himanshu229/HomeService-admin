@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { Booking, BookingStatus, SliceState } from "../../types";
-import { bookingApi } from "../../services/bookingApi";
+import { adminBookingApi } from "../../api/booking.api";
 
 type BookingState = SliceState<Booking>;
 
@@ -21,7 +21,7 @@ export const fetchBookings = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      return await bookingApi.getAll(params);
+      return await adminBookingApi.getAll(params);
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message ?? "Failed to fetch bookings");
     }
@@ -35,7 +35,7 @@ export const updateBookingStatus = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      return await bookingApi.updateStatus(id, status, technicianId);
+      return await adminBookingApi.updateStatus(id, status, technicianId);
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message ?? "Failed to update booking");
     }
@@ -49,7 +49,7 @@ export const assignTechnician = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      return await bookingApi.assignTechnician(bookingId, technicianId);
+      return await adminBookingApi.assignTechnician(bookingId, technicianId);
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message ?? "Failed to assign technician");
     }
