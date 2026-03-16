@@ -21,10 +21,12 @@ export type ServiceStatus = "published" | "unpublished";
 export interface Service {
   id: string;
   name: string;
-  category: string;
-  description: string;
+  category: { name: string; emoji: string } | string;
+  categoryId?: string;
   price: number;
-  duration: number; // minutes
+  aboutService?: string;
+  whatsIncluded?: string;
+  warranty?: string;
   status: ServiceStatus;
   imageUrl?: string;
   createdAt: string;
@@ -34,9 +36,13 @@ export interface Service {
 export interface ServiceCategory {
   id: string;
   name: string;
-  icon?: string;
-  description?: string;
-  serviceCount: number;
+  emoji: string;
+  description: string;
+  color: string;
+  serviceCount?: number;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // ─── Booking ─────────────────────────────────────────────────────────────────

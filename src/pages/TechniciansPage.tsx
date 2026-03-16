@@ -47,7 +47,7 @@ const TechniciansPage: React.FC = () => {
         status: statusFilter !== "all" ? (statusFilter as Technician["status"]) : undefined,
       })
     );
-  }, [dispatch, page, search, statusFilter]);
+  }, [page, search, statusFilter]);
 
   useEffect(() => { load(); }, [load]);
 

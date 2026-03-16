@@ -36,16 +36,16 @@ const ServiceIcon = () => (
 const Dashboard: React.FC = () => {
   const dispatch = useAppDispatch();
   const { items: bookings, total: totalBookings } = useAppSelector((s) => s.bookings);
-  const { items: services, total: totalServices } = useAppSelector((s) => s.services);
+  const { total: totalServices } = useAppSelector((s) => s.services);
   const { items: technicians } = useAppSelector((s) => s.technicians);
 
   useEffect(() => {
     dispatch(fetchBookings({ limit: 5 }));
     dispatch(fetchServices({ limit: 50 }));
     dispatch(fetchTechnicians({ limit: 50 }));
-  }, [dispatch]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const completedBookings = bookings.filter((b) => b.status === "completed").length;
   const totalRevenue = bookings
     .filter((b) => b.status === "completed")
     .reduce((sum, b) => sum + b.totalAmount, 0);

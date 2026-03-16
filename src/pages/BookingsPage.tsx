@@ -47,7 +47,7 @@ const BookingsPage: React.FC = () => {
         status: statusFilter !== "all" ? statusFilter : undefined,
       })
     );
-  }, [dispatch, page, search, statusFilter]);
+  }, [page, search, statusFilter]);
 
   useEffect(() => { load(); }, [load]);
 

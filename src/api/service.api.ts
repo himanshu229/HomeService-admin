@@ -69,7 +69,7 @@ export const adminServiceApi = {
     return res.data.data;
   },
 
-  createCategory: async (data: { name: string; emoji: string; description: string; color: string }) => {
+  createCategory: async (data: { name: string; emoji: string; description?: string; color?: string }) => {
     const res = await api.post<ApiResponse<ServiceCategory>>(ADMIN_ENDPOINTS.SERVICES.CATEGORIES, data);
     return res.data.data;
   },
