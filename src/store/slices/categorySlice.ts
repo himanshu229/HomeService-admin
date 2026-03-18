@@ -28,7 +28,7 @@ export const fetchCategories = createAsyncThunk(
 export const createCategory = createAsyncThunk(
   "categories/create",
   async (
-    data: { name: string; emoji: string; description?: string; color?: string },
+    data: { name: string; emoji: string },
     { rejectWithValue }
   ) => {
     try {
@@ -42,7 +42,7 @@ export const createCategory = createAsyncThunk(
 export const updateCategory = createAsyncThunk(
   "categories/update",
   async (
-    { id, data }: { id: string; data: Partial<{ name: string; emoji: string; description: string; color: string }> },
+    { id, data }: { id: string; data: Partial<{ name: string; emoji: string }> },
     { rejectWithValue }
   ) => {
     try {

@@ -28,6 +28,7 @@ export interface Service {
   whatsIncluded?: string;
   warranty?: string;
   status: ServiceStatus;
+  popular?: boolean;
   imageUrl?: string;
   createdAt: string;
   updatedAt: string;
@@ -37,10 +38,7 @@ export interface ServiceCategory {
   id: string;
   name: string;
   emoji: string;
-  description: string;
-  color: string;
   serviceCount?: number;
-  isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

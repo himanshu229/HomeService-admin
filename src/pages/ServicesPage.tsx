@@ -6,6 +6,7 @@ import {
   updateService,
   deleteService,
   toggleServiceStatus,
+  toggleServicePopular,
   setSelectedService,
   clearSelectedService,
 } from "../store/slices/serviceSlice";
@@ -195,6 +196,10 @@ const ServicesPage: React.FC = () => {
     dispatch(toggleServiceStatus(id));
   };
 
+  const handleTogglePopular = (id: string) => {
+    dispatch(toggleServicePopular(id));
+  };
+
   const totalPages = Math.ceil(total / LIMIT);
 
   const columns = [
@@ -216,6 +221,29 @@ const ServicesPage: React.FC = () => {
       render: (v: number) => (
         <span className="font-semibold text-gray-800">₹{v.toLocaleString("en-IN")}</span>
       ),
+    },
+    {
+      key: "popular",
+      label: "Popular",
+      render: (_: any, row: Service) => {
+        const isPopular = (row as any).popular === true;
+        return (
+          <button
+            onClick={() => handleTogglePopular(row.id)}
+            className={`p-1.5 rounded-lg transition-colors ${
+              isPopular
+                ? "text-yellow-500 hover:bg-yellow-50"
+                : "text-gray-300 hover:bg-gray-100 hover:text-yellow-400"
+            }`}
+            title={isPopular ? "Popular — click to remove" : "Not popular — click to mark"}
+          >
+            <svg className="w-5 h-5" fill={isPopular ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+            </svg>
+          </button>
+        );
+      },
     },
     {
       key: "status",
@@ -341,9 +369,6 @@ const ServicesPage: React.FC = () => {
                   </div>
                 </div>
                 <h3 className="font-semibold text-gray-900">{cat.name}</h3>
-                {cat.description && (
-                  <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{cat.description}</p>
-                )}
                 <p className="text-sm text-gray-500 mt-1">
                   {cat.serviceCount ?? items.filter((s: Service) => {
                     const catName = typeof s.category === 'object' ? s.category.name : s.category;

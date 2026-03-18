@@ -53,6 +53,11 @@ export const adminServiceApi = {
     return res.data.data;
   },
 
+  togglePopular: async (id: string) => {
+    const res = await api.patch<ApiResponse<Service>>(ADMIN_ENDPOINTS.SERVICES.TOGGLE_POPULAR(id));
+    return res.data.data;
+  },
+
   uploadImage: (id: string, file: File) => {
     const form = new FormData();
     form.append('image', file);
@@ -69,12 +74,12 @@ export const adminServiceApi = {
     return res.data.data;
   },
 
-  createCategory: async (data: { name: string; emoji: string; description?: string; color?: string }) => {
+  createCategory: async (data: { name: string; emoji: string }) => {
     const res = await api.post<ApiResponse<ServiceCategory>>(ADMIN_ENDPOINTS.SERVICES.CATEGORIES, data);
     return res.data.data;
   },
 
-  updateCategory: async (id: string, data: Partial<{ name: string; emoji: string; description: string; color: string }>) => {
+  updateCategory: async (id: string, data: Partial<{ name: string; emoji: string }>) => {
     const res = await api.put<ApiResponse<ServiceCategory>>(ADMIN_ENDPOINTS.SERVICES.CATEGORY_DETAIL(id), data);
     return res.data.data;
   },

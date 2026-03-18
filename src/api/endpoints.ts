@@ -14,6 +14,7 @@ export const ADMIN_ENDPOINTS = {
     DETAIL:          (id: string) => `/admin/services/${id}`,
     IMAGE:           (id: string) => `/admin/services/${id}/image`,
     TOGGLE:          (id: string) => `/admin/services/${id}/toggle`,
+    TOGGLE_POPULAR:  (id: string) => `/admin/services/${id}/toggle-popular`,
     CATEGORIES:      '/admin/categories',
     CATEGORY_DETAIL: (id: string) => `/admin/categories/${id}`,
   },

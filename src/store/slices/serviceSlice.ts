@@ -70,6 +70,17 @@ export const toggleServiceStatus = createAsyncThunk(
   }
 );
 
+export const toggleServicePopular = createAsyncThunk(
+  "services/togglePopular",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      return await adminServiceApi.togglePopular(id);
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message ?? "Failed to toggle popular");
+    }
+  }
+);
+
 const serviceSlice = createSlice({
   name: "services",
   initialState,
@@ -112,6 +123,11 @@ const serviceSlice = createSlice({
       })
       // toggleStatus
       .addCase(toggleServiceStatus.fulfilled, (state, action) => {
+        const idx = state.items.findIndex((s) => s.id === action.payload.id);
+        if (idx !== -1) state.items[idx] = action.payload;
+      })
+      // togglePopular
+      .addCase(toggleServicePopular.fulfilled, (state, action) => {
         const idx = state.items.findIndex((s) => s.id === action.payload.id);
         if (idx !== -1) state.items[idx] = action.payload;
       });
