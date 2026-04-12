@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { fetchBookings, updateBookingStatus } from "../store/slices/bookingSlice";
+import { fetchBookings, updateBookingStatus, assignTechnician } from "../store/slices/bookingSlice";
+import { fetchTechnicians } from "../store/slices/technicianSlice";
 import { Booking, BookingStatus } from "../types";
 import DataTable from "../components/common/DataTable";
 import SearchInput from "../components/common/SearchInput";
@@ -29,6 +30,7 @@ const BOOKING_STATUS_FLOW: BookingStatus[] = [
 const BookingsPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const { items, loading, total } = useAppSelector((s) => s.bookings);
+  const { items: technicians } = useAppSelector((s) => s.technicians);
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">("all");
@@ -36,6 +38,8 @@ const BookingsPage: React.FC = () => {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [newStatus, setNewStatus] = useState<BookingStatus>("pending");
   const [updating, setUpdating] = useState(false);
+  const [assignTechId, setAssignTechId] = useState("__unassign__");
+  const [assigning, setAssigning] = useState(false);
   const LIMIT = 10;
 
   const load = useCallback(() => {
@@ -54,6 +58,9 @@ const BookingsPage: React.FC = () => {
   const openDetail = (booking: Booking) => {
     setSelectedBooking(booking);
     setNewStatus(booking.status);
+    // Pre-select the already-assigned technician (or fall back to Unassign)
+    setAssignTechId(booking.technicianId ?? "__unassign__");
+    dispatch(fetchTechnicians({ limit: 100, status: "active" }));
   };
 
   const handleStatusUpdate = async () => {
@@ -63,6 +70,19 @@ const BookingsPage: React.FC = () => {
     setUpdating(false);
     setSelectedBooking(null);
     load();
+  };
+
+  const handleAssign = async () => {
+    if (!selectedBooking) return;
+    setAssigning(true);
+    const techId = assignTechId === "__unassign__" ? null : assignTechId;
+    const result = await dispatch(assignTechnician({ bookingId: selectedBooking.id, technicianId: techId as any }));
+    setAssigning(false);
+    if (assignTechnician.fulfilled.match(result)) {
+      setSelectedBooking(result.payload);
+      setAssignTechId("__unassign__");
+      load();
+    }
   };
 
   const totalPages = Math.ceil(total / LIMIT);
@@ -222,7 +242,7 @@ const BookingsPage: React.FC = () => {
                 ["Service",     selectedBooking.serviceName],
                 ["Date",        new Date(selectedBooking.scheduledDate).toLocaleDateString("en-IN")],
                 ["Time",        selectedBooking.scheduledTime],
-                ["Technician",  selectedBooking.technicianName ?? "Unassigned"],
+                ["Technician",  selectedBooking.technicianName ?? "Unassigned (see below)"],
                 ["Amount",      `₹${selectedBooking.totalAmount.toLocaleString("en-IN")}`],
               ].map(([label, value]) => (
                 <div key={label}>
@@ -235,6 +255,43 @@ const BookingsPage: React.FC = () => {
                 <p className="font-medium text-gray-900 mt-0.5">{selectedBooking.address}</p>
               </div>
             </div>
+
+            {/* Assign Technician */}
+            {!["completed", "cancelled"].includes(selectedBooking.status) && (
+              <div className="border-t border-gray-100 pt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Assign Technician
+                </label>
+                <div className="flex gap-2">
+                  <select
+                    value={assignTechId}
+                    onChange={(e) => setAssignTechId(e.target.value)}
+                    className="input flex-1"
+                  >
+                    <option value="__unassign__">— Unassign —</option>
+                    {technicians.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name} · ⭐ {t.rating?.toFixed(1) ?? "—"} · {t.specializations?.slice(0, 2).join(", ")}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={handleAssign}
+                    disabled={assigning}
+                    className="btn-primary whitespace-nowrap disabled:opacity-50"
+                  >
+                    {assigning
+                      ? (assignTechId === "__unassign__" ? "Unassigning..." : "Assigning...")
+                      : (assignTechId === "__unassign__" ? "Unassign" : "Assign")}
+                  </button>
+                </div>
+                {selectedBooking.technicianName && (
+                  <p className="mt-1.5 text-xs text-gray-500">
+                    Currently assigned: <span className="font-medium text-gray-700">{selectedBooking.technicianName}</span>
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Status update */}
             <div className="border-t border-gray-100 pt-4">

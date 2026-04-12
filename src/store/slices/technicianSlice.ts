@@ -62,6 +62,17 @@ export const deleteTechnician = createAsyncThunk(
   }
 );
 
+export const toggleTechnicianStatus = createAsyncThunk(
+  "technicians/toggleStatus",
+  async (id: string, { rejectWithValue }) => {
+    try {
+      return await adminTechnicianApi.toggleStatus(id);
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message ?? "Failed to toggle status");
+    }
+  }
+);
+
 const technicianSlice = createSlice({
   name: "technicians",
   initialState,
@@ -97,6 +108,10 @@ const technicianSlice = createSlice({
       .addCase(deleteTechnician.fulfilled, (state, action) => {
         state.items = state.items.filter((t) => t.id !== action.payload);
         state.total -= 1;
+      })
+      .addCase(toggleTechnicianStatus.fulfilled, (state, action) => {
+        const idx = state.items.findIndex((t) => t.id === action.payload.id);
+        if (idx !== -1) state.items[idx] = action.payload;
       });
   },
 });

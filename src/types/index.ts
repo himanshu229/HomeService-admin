@@ -92,6 +92,8 @@ export interface Customer {
   name: string;
   email: string;
   phone: string;
+  isVerified?: boolean;
+  isActive?: boolean;
   totalBookings: number;
   createdAt: string;
 }

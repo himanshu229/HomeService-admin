@@ -8,16 +8,14 @@ import {
   setSelectedTechnician,
   clearSelectedTechnician,
 } from "../store/slices/technicianSlice";
+import { fetchCategories } from "../store/slices/categorySlice";
 import { Technician } from "../types";
 import DataTable from "../components/common/DataTable";
 import SearchInput from "../components/common/SearchInput";
 import Modal from "../components/common/Modal";
 import ConfirmDialog from "../components/common/ConfirmDialog";
-
-const SPECIALIZATIONS = [
-  "AC Services", "Refrigerator", "Washing Machine",
-  "Fan & Electricals", "Plumbing", "Carpentry",
-];
+import { validatePhone } from "../utils/common";
+import { toggleTechnicianStatus } from "../store/slices/technicianSlice";
 
 const INIT_FORM: Partial<Technician> = {
   name: "", email: "", phone: "",
@@ -28,6 +26,7 @@ const TechniciansPage: React.FC = () => {
   const dispatch  = useAppDispatch();
   const { items, loading, total } = useAppSelector((s) => s.technicians);
   const selected  = useAppSelector((s) => s.technicians.selectedItem);
+  const { items: categories, loading: catsLoading } = useAppSelector((s) => s.categories);
 
   const [search, setSearch]             = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive" | "on_job">("all");
@@ -36,6 +35,7 @@ const TechniciansPage: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<Technician | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [form, setForm]                 = useState<Partial<Technician>>(INIT_FORM);
+  const [phoneError, setPhoneError]     = useState("");
   const LIMIT = 10;
 
   const load = useCallback(() => {
@@ -54,12 +54,16 @@ const TechniciansPage: React.FC = () => {
   const openCreate = () => {
     dispatch(clearSelectedTechnician());
     setForm(INIT_FORM);
+    setPhoneError("");
+    dispatch(fetchCategories());
     setShowModal(true);
   };
 
   const openEdit = (t: Technician) => {
     dispatch(setSelectedTechnician(t));
     setForm(t);
+    setPhoneError("");
+    dispatch(fetchCategories());
     setShowModal(true);
   };
 
@@ -67,10 +71,14 @@ const TechniciansPage: React.FC = () => {
     setShowModal(false);
     dispatch(clearSelectedTechnician());
     setForm(INIT_FORM);
+    setPhoneError("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const err = validatePhone(form.phone ?? "");
+    if (err) { setPhoneError(err); return; }
+    setPhoneError("");
     if (selected) {
       await dispatch(updateTechnician({ id: selected.id, data: form }));
     } else {
@@ -88,6 +96,10 @@ const TechniciansPage: React.FC = () => {
     setDeleteTarget(null);
   };
 
+  const handleToggleStatus = (id: string) => {
+    dispatch(toggleTechnicianStatus(id));
+  };
+
   const toggleSpec = (spec: string) => {
     setForm((f) => {
       const specs = f.specializations ?? [];
@@ -101,20 +113,6 @@ const TechniciansPage: React.FC = () => {
   };
 
   const totalPages = Math.ceil(total / LIMIT);
-
-  const statusBadge = (status: Technician["status"]) => {
-    const map = {
-      active:   "bg-green-100 text-green-700",
-      inactive: "bg-gray-100 text-gray-600",
-      on_job:   "bg-blue-100 text-blue-700",
-    };
-    const labels = { active: "Active", inactive: "Inactive", on_job: "On Job" };
-    return (
-      <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${map[status]}`}>
-        {labels[status]}
-      </span>
-    );
-  };
 
   const columns = [
     {
@@ -161,7 +159,24 @@ const TechniciansPage: React.FC = () => {
     {
       key: "status",
       label: "Status",
-      render: (v: Technician["status"]) => statusBadge(v),
+      render: (v: Technician["status"], row: Technician) => {
+        const isActive = v === "active" || v === "on_job";
+        return (
+          <button
+            onClick={() => handleToggleStatus(row.id)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+              isActive ? "bg-green-500" : "bg-gray-300"
+            }`}
+            title={isActive ? "Active — click to deactivate" : "Inactive — click to activate"}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                isActive ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        );
+      },
     },
     {
       key: "id",
@@ -235,7 +250,22 @@ const TechniciansPage: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
-              <input required className="input" value={form.phone ?? ""} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} placeholder="+91 9876543210" />
+              <input
+                required
+                className={`input ${phoneError ? "border-red-500 focus:ring-red-500" : ""}`}
+                value={form.phone ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setForm((f) => ({ ...f, phone: val }));
+                  setPhoneError(validatePhone(val));
+                }}
+                placeholder="9876543210"
+                maxLength={10}
+                inputMode="numeric"
+              />
+              {phoneError && (
+                <p className="mt-1 text-xs text-red-600">{phoneError}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
@@ -252,22 +282,26 @@ const TechniciansPage: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Specializations</label>
-            <div className="flex flex-wrap gap-2">
-              {SPECIALIZATIONS.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => toggleSpec(s)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-                    (form.specializations ?? []).includes(s)
-                      ? "bg-primary-600 text-white border-primary-600"
-                      : "bg-white text-gray-600 border-gray-300 hover:border-primary-400"
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+            {catsLoading ? (
+              <p className="text-sm text-gray-400">Loading...</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => toggleSpec(cat.name)}
+                    className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                      (form.specializations ?? []).includes(cat.name)
+                        ? "bg-primary-600 text-white border-primary-600"
+                        : "bg-white text-gray-600 border-gray-300 hover:border-primary-400"
+                    }`}
+                  >
+                    {cat.emoji} {cat.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex gap-3 justify-end border-t border-gray-100 pt-3">

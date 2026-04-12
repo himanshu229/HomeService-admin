@@ -54,6 +54,11 @@ export const adminTechnicianApi = {
     await api.delete<ApiResponse<null>>(ADMIN_ENDPOINTS.TECHNICIANS.DETAIL(id));
   },
 
+  toggleStatus: async (id: string) => {
+    const res = await api.patch<ApiResponse<Technician>>(ADMIN_ENDPOINTS.TECHNICIANS.TOGGLE(id));
+    return res.data.data;
+  },
+
   updateServices: async (id: string, serviceIds: string[]) => {
     const res = await api.put<ApiResponse<Technician>>(
       ADMIN_ENDPOINTS.TECHNICIANS.SERVICES(id),

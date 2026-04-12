@@ -32,6 +32,7 @@ export const ADMIN_ENDPOINTS = {
     BASE:      '/admin/technicians',
     DETAIL:    (id: string) => `/admin/technicians/${id}`,
     AVAILABLE: '/admin/technicians/available',
+    TOGGLE:    (id: string) => `/admin/technicians/${id}/toggle`,
     SERVICES:  (id: string) => `/admin/technicians/${id}/services`,
   },
 

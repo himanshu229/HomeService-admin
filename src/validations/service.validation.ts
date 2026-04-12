@@ -1,5 +1,6 @@
 // Install: npm install zod
 import { z } from 'zod';
+import { REGEX } from '../utils/common';
 
 export const serviceSchema = z.object({
   name: z
@@ -61,7 +62,7 @@ export const technicianSchema = z.object({
   phone: z
     .string()
     .length(10, 'Phone number must be 10 digits')
-    .regex(/^[6-9]\d{9}$/, 'Enter a valid Indian mobile number'),
+    .regex(REGEX.PHONE, 'Enter a valid Indian mobile number'),
 
   email: z.string().email('Enter a valid email').optional().or(z.literal('')),
 
